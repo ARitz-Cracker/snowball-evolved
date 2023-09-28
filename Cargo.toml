@@ -1,0 +1,18 @@
+[workspace]
+members = ["./acetewm"]
+
+[workspace.dependencies]
+thiserror = "1.0"
+color-eyre = "0.5"
+bpaf = { version = "0.9", features = ["derive"] }
+scraper = "0.16"
+html5ever = "0.26"
+hyper = { version = "1.0.0-rc.4", features = ["full"] }
+lazy-regex = "2.5"
+lazy_static = "1"
+tokio = { version = "1", features = ["rt", "sync", "net", "fs"] }
+log = "0.4"
+env_logger = "0.10"
+convert_case = "0.6"
+borsh = "0.10"
+ego-tree = "0.6.2"

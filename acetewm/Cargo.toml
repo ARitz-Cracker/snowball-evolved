@@ -1,0 +1,24 @@
+[package]
+name = "acetewm"
+version = "0.0.1-dev.10"
+edition = "2021"
+license = "GPL-3.0-or-later"
+description = "Aritz's Custom Element Template Engine"
+homepage = "https://github.com/ARitz-Cracker/snowball-evolved"
+documentation = "https://github.com/ARitz-Cracker/snowball-evolved"
+repository = "https://github.com/ARitz-Cracker/snowball-evolved"
+readme = "../README.md"
+
+[dependencies]
+thiserror = {workspace = true}
+color-eyre = {workspace = true}
+bpaf = {workspace = true}
+scraper = {workspace = true}
+log = {workspace = true}
+env_logger = {workspace = true}
+convert_case = {workspace = true}
+html5ever = {workspace = true}
+lazy_static = {workspace = true}
+borsh = {workspace = true}
+lazy-regex = {workspace = true}
+ego-tree = {workspace = true}
