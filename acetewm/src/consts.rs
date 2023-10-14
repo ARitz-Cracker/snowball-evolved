@@ -15,6 +15,8 @@ lazy_static! {
 	pub static ref ATTRIBUTE_TYPE: QualName = QualName::new(None, "".into(), "type".into());
 	pub static ref ATTRIBUTE_ACE_REF: QualName = QualName::new(None, "".into(), "ace-ref".into());
 	pub static ref ATTRIBUTE_ACE_NAME: QualName = QualName::new(None, "".into(), "ace-name".into());
+	pub static ref ATTRIBUTE_ACE_EXTENDS: QualName = QualName::new(None, "".into(), "ace-extends".into());
+	pub static ref ATTRIBUTE_ACE_ATTRIBUTES: QualName = QualName::new(None, "".into(), "ace-attributes".into());
 	pub static ref ATTRIBUTE_ID: QualName = QualName::new(None, "".into(), "id".into());
 	pub static ref HTML_TAG_TO_TYPE: HashMap<&'static str, &'static str> = {
 		// Generated from using /^(\s*)"(.*?)"\s*:\s*(.*?);\s*$/gm on HTMLElementTagNameMap in lib.dom.d.ts

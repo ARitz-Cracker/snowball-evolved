@@ -6,7 +6,7 @@ use log::{debug, warn, error};
 use scraper::{Html, Node as HtmlNode, Selector, ElementRef, node::Text};
 use ego_tree::{Tree, NodeId};
 
-use crate::{consts::{ATTRIBUTE_ACE_NAME, VALID_CUSTOM_ELEMENT_NAME, INVALID_CUSTOM_ELEMENT_NAME, ATTRIBUTE_ID, ATTRIBUTE_INLINE}, workarounds::{html_node_editable::EditableHtmlNode, ego_tree_addons::NodeMutAddons}};
+use crate::{consts::{ATTRIBUTE_ACE_NAME, VALID_CUSTOM_ELEMENT_NAME, INVALID_CUSTOM_ELEMENT_NAME, ATTRIBUTE_ID, ATTRIBUTE_INLINE, ATTRIBUTE_ACE_ATTRIBUTES, ATTRIBUTE_ACE_EXTENDS}, workarounds::{html_node_editable::EditableHtmlNode, ego_tree_addons::NodeMutAddons}};
 
 use super::recursive_template_search;
 
@@ -167,6 +167,8 @@ pub(crate) fn do_bundle_spa<P: AsRef<Path>>(
 			let template_elem_tag = elem.attrs.get(&ATTRIBUTE_ACE_NAME).unwrap().clone();
 			let template_template_id = format!("ace-template-{}", template_elem_tag);
 			elem.attrs.remove(&ATTRIBUTE_ACE_NAME);
+			elem.attrs.remove(&ATTRIBUTE_ACE_ATTRIBUTES);
+			elem.attrs.remove(&ATTRIBUTE_ACE_EXTENDS);
 			elem.attrs.insert(ATTRIBUTE_ID.clone(), template_template_id.clone().into());
 			let is_inline = elem.attrs.contains_key(&ATTRIBUTE_INLINE);
 			let node_ref = template_markup.tree.get(*node_id).unwrap(); // invalidates elem
