@@ -1,12 +1,12 @@
 use std::{fs, path::{Path, PathBuf}, io, collections::{HashMap, HashSet}, sync::Arc, ffi::OsString};
-use acetewm::selector;
+use cewt::selector;
 use color_eyre::eyre::Result;
 use lazy_static::lazy_static;
 use log::{debug, warn, error};
 use scraper::{Html, Node as HtmlNode, Selector, ElementRef, node::Text};
 use ego_tree::{Tree, NodeId};
 
-use crate::{consts::{ATTRIBUTE_ACE_NAME, VALID_CUSTOM_ELEMENT_NAME, INVALID_CUSTOM_ELEMENT_NAME, ATTRIBUTE_ID, ATTRIBUTE_INLINE, ATTRIBUTE_ACE_ATTRIBUTES, ATTRIBUTE_ACE_EXTENDS}, workarounds::{html_node_editable::EditableHtmlNode, ego_tree_addons::NodeMutAddons}};
+use crate::{consts::{ATTRIBUTE_CEWT_NAME, VALID_CUSTOM_ELEMENT_NAME, INVALID_CUSTOM_ELEMENT_NAME, ATTRIBUTE_ID, ATTRIBUTE_INLINE, ATTRIBUTE_CEWT_ATTRIBUTES, ATTRIBUTE_CEWT_EXTENDS}, workarounds::{html_node_editable::EditableHtmlNode, ego_tree_addons::NodeMutAddons}};
 
 use super::recursive_template_search;
 
@@ -112,9 +112,6 @@ pub(crate) fn do_bundle_spa<P: AsRef<Path>>(
 	);
 	file_path.pop();
 
-
-	//let custom_elements = 
-
 	// TODO: Read closest found package.json and read dependencies for templates
 	recursive_template_search(file_path, &NO_MAIN_TEMPLATE, &mut |file_path, _| {
 		debug!("do_bundle_spa: process file: {}", file_path.to_string_lossy());
@@ -141,8 +138,8 @@ pub(crate) fn do_bundle_spa<P: AsRef<Path>>(
 				if elem.name() != "template" {
 					return None;
 				}
-				let Some(template_elem_tag) = elem.attrs.get(&ATTRIBUTE_ACE_NAME) else {
-					warn!("Skipping template without \"ace-name\" attribute");
+				let Some(template_elem_tag) = elem.attrs.get(&ATTRIBUTE_CEWT_NAME) else {
+					warn!("Skipping template without \"cewt-name\" attribute");
 					return None;
 				};
 				if
@@ -164,11 +161,11 @@ pub(crate) fn do_bundle_spa<P: AsRef<Path>>(
 				continue;
 			};
 			let elem = node_ref.value().as_element_mut().unwrap();
-			let template_elem_tag = elem.attrs.get(&ATTRIBUTE_ACE_NAME).unwrap().clone();
+			let template_elem_tag = elem.attrs.get(&ATTRIBUTE_CEWT_NAME).unwrap().clone();
 			let template_template_id = format!("ace-template-{}", template_elem_tag);
-			elem.attrs.remove(&ATTRIBUTE_ACE_NAME);
-			elem.attrs.remove(&ATTRIBUTE_ACE_ATTRIBUTES);
-			elem.attrs.remove(&ATTRIBUTE_ACE_EXTENDS);
+			elem.attrs.remove(&ATTRIBUTE_CEWT_NAME);
+			elem.attrs.remove(&ATTRIBUTE_CEWT_ATTRIBUTES);
+			elem.attrs.remove(&ATTRIBUTE_CEWT_EXTENDS);
 			elem.attrs.insert(ATTRIBUTE_ID.clone(), template_template_id.clone().into());
 			let is_inline = elem.attrs.contains_key(&ATTRIBUTE_INLINE);
 			let node_ref = template_markup.tree.get(*node_id).unwrap(); // invalidates elem

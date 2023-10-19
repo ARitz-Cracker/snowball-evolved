@@ -1,9 +1,9 @@
 [package]
-name = "acetewm"
+name = "cewt"
 version = "0.0.2-dev.0"
 edition = "2021"
 license = "GPL-3.0-or-later"
-description = "Aritz's Custom Element Template Engine"
+description = "Custom Elements With Templates"
 homepage = "https://github.com/ARitz-Cracker/snowball-evolved"
 documentation = "https://github.com/ARitz-Cracker/snowball-evolved"
 repository = "https://github.com/ARitz-Cracker/snowball-evolved"

@@ -1,5 +1,5 @@
 [workspace]
-members = ["./acetewm"]
+members = ["./cewt"]
 
 [workspace.dependencies]
 thiserror = "1.0"
