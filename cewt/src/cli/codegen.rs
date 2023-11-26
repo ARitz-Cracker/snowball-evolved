@@ -220,7 +220,7 @@ pub(crate) fn form_collection_code_gen<W: Write>(class_name: &str, form_elem: El
 	Ok(())
 }
 
-pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>) -> Result<()> {
+pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>, inline_template: bool) -> Result<()> {
 	debug!("do_code_gen: process file: {}", file_path.to_string_lossy());
 	let template_markup = Html::parse_fragment(
 		&String::from_utf8_lossy(&fs::read(&file_path)?)
@@ -412,7 +412,7 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>) -> Res
 			}else{
 				writeln!(
 					file_handle,
-					"\t\t\tthis._{} = this._element.querySelector(\"[cewt-ref=\\\"{}\\\"]:not(:not(:scope)[is] *)\")!;",
+					"\t\t\tthis._{} = this._element.querySelector(\"[cewt-ref=\\\"{}\\\"]:not(:scope [is] *)\")!;",
 					ref_property_name,
 					ref_raw_name,
 				)?;
@@ -429,6 +429,37 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>) -> Res
 			writeln!(file_handle, "\t\treturn this._{};", ref_property_name)?;
 			writeln!(file_handle, "\t}}")?;
 		}
+		writeln!(file_handle, "}}")?;
+
+
+		// Generate the template ref
+		writeln!(file_handle, "let _template{}: HTMLTemplateElement | null = null;", template_class_name)?;
+		writeln!(file_handle, "function get{}Template(): HTMLTemplateElement {{", template_class_name)?;
+		writeln!(file_handle, "\tif (_template{} == null) {{", template_class_name)?;
+		if inline_template {
+			writeln!(
+				file_handle,
+				"\t\t _template{} = document.createElement(\"template\")",
+				template_class_name
+			)?;
+			// Using ttmplate literals would be nicer here, but this way I don't have to write my own escape rules...
+			writeln!(
+				file_handle,
+				"\t\t _template{}.innerHTML = \"{}\";",
+				template_class_name,
+				ElementRef::wrap(node_ref).unwrap().inner_html().escape_debug()
+			)?;
+		}else{
+			writeln!(
+				file_handle,
+				"\t\t _template{} = document.getElementById(\"{}\") as HTMLTemplateElement;",
+				template_class_name,
+				template_template_id
+			)?;
+		}
+		
+		writeln!(file_handle, "\t}}")?;
+		writeln!(file_handle, "\treturn _template{};", template_class_name)?;
 		writeln!(file_handle, "}}")?;
 
 		// Write base autogen
@@ -511,7 +542,7 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>) -> Res
 		if template_extends_tag.is_none() {
 			writeln!(file_handle, "\t\tconst shadowRoot = this.attachShadow({{ mode: \"open\" }});")?;
 			writeln!(file_handle, "\t\tshadowRoot.appendChild(")?;
-			writeln!(file_handle, "\t\t\t(document.getElementById(\"{}\") as HTMLTemplateElement)", template_template_id)?;
+			writeln!(file_handle, "\t\t\tget{}Template()", template_class_name)?;
 			writeln!(file_handle, "\t\t\t\t.content")?;
 			writeln!(file_handle, "\t\t\t\t.cloneNode(true)")?;
 			writeln!(file_handle, "\t\t);")?;
@@ -519,7 +550,7 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>) -> Res
 		}else{
 			writeln!(file_handle, "\t\tif (this.childElementCount == 0) {{")?;
 			writeln!(file_handle, "\t\t\tthis.appendChild(")?;
-			writeln!(file_handle, "\t\t\t\t(document.getElementById(\"{}\") as HTMLTemplateElement)", template_template_id)?;
+			writeln!(file_handle, "\t\t\t\tget{}Template()", template_class_name)?;
 			writeln!(file_handle, "\t\t\t\t\t.content")?;
 			writeln!(file_handle, "\t\t\t\t\t.cloneNode(true)")?;
 			writeln!(file_handle, "\t\t\t);")?;
@@ -529,6 +560,16 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>) -> Res
 		writeln!(file_handle, "\t\tthis.refs = new {}Refs(this);", template_class_name)?;
 		writeln!(file_handle, "\t}}")?;
 
+		writeln!(file_handle, "\tconnectedCallback() {{")?;
+		writeln!(file_handle, "\t\t// To be overridden by child class")?;
+		writeln!(file_handle, "\t}}")?;
+		writeln!(file_handle, "\tdisconnectedCallback() {{")?;
+		writeln!(file_handle, "\t\t// To be overridden by child class")?;
+		writeln!(file_handle, "\t}}")?;
+		writeln!(file_handle, "\tadoptedCallback() {{")?;
+		writeln!(file_handle, "\t\t// To be overridden by child class")?;
+		writeln!(file_handle, "\t}}")?;
+		
 		writeln!(file_handle, "\tpublic static registerElement() {{")?;
 		if let Some(base_tag) = template_extends_tag {
 			writeln!(file_handle, "\t\tcustomElements.define(\"{}\", this, {{ extends: \"{}\"}});", template_elem_tag, base_tag)?;

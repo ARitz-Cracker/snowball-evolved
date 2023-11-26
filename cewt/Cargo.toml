@@ -1,13 +1,13 @@
 [package]
 name = "cewt"
-version = "0.0.2-dev.0"
+version = "0.1.0"
 edition = "2021"
 license = "GPL-3.0-or-later"
 description = "Custom Elements With Templates"
 homepage = "https://github.com/ARitz-Cracker/snowball-evolved"
 documentation = "https://github.com/ARitz-Cracker/snowball-evolved"
 repository = "https://github.com/ARitz-Cracker/snowball-evolved"
-readme = "../README.md"
+readme = "README.md"
 
 [dependencies]
 thiserror = {workspace = true}
@@ -22,3 +22,4 @@ lazy_static = {workspace = true}
 borsh = {workspace = true}
 lazy-regex = {workspace = true}
 ego-tree = {workspace = true}
+serde_json = {workspace = true}

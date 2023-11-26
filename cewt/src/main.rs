@@ -19,6 +19,9 @@ pub(crate) enum CliAction {
 		/// Folder names to exclude, defaults to node_modules.
 		#[bpaf(argument("NAME"), short, long)]
 		exclude: Vec<OsString>,
+		/// Include HTML sniipet in TypeScript output instead of assuming the template exists in the DOM
+		#[bpaf(short('I'), long)]
+		inline_html: bool,
 		/// Folder to scan for HTML template fragments and generate accompanying code.
 		#[bpaf(positional("PATH"))]
 		path: PathBuf
@@ -76,11 +79,6 @@ pub(crate) enum CliAction {
 		/// Folder to scan for HTML template fragments. Must contain a main_template.html.
 		#[bpaf(argument("PATH"), short('f'), long)]
 		input_fragments: PathBuf
-	},
-	#[bpaf(command("start-server"))]
-	/// Starts the acetewm server, which converts page definitions to documents on-the-fly.
-	StartServer {
-
 	}
 }
 
@@ -89,7 +87,7 @@ fn main() -> Result<()> {
 	env_logger::init();
 	let options = cli_action().run();
 	match options {
-		CliAction::Codegen { exclude, path } => {
+		CliAction::Codegen { exclude, path, inline_html } => {
 			recursive_template_search(
 				path,
 				&{
@@ -99,7 +97,9 @@ fn main() -> Result<()> {
 						exclude
 					}
 				}.into_iter().collect(),
-				&mut do_code_gen
+				&mut |file_path, base_name_hint| {
+					do_code_gen(file_path, base_name_hint, inline_html)
+				}
 			)?;
 		},
 		CliAction::BundleSinglePageApp {
@@ -116,15 +116,5 @@ fn main() -> Result<()> {
 		}
 		_ => todo!()
 	}
-	/*
-	let fragment = html!(r#"
-		<h1>Test fragment</h1>
-		<p>I am a paragraph with a <custom-elem>custom element</custom-elem></p>
-		<p>I am a paragraph with a <other-custom-elem>OTHER custom element</other-custom-elem></p>
-	"#);
-	let mut a = fragment.select(selector!("custom-elem, other-custom-elem"));
-	println!("Custom elenm {:#?}", a.next().unwrap().value());
-	println!("Custom eledddnm {:#?}", a.next().unwrap().value());
-	*/
 	Ok(())
 }

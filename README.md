@@ -6,10 +6,9 @@
 
 This repository aims to provide a helpful collection of tools to reduce the performance overhead often associated with modern website development. At its center, is `acetewm`.
 
-## ACETEWM
-_Aritz's Custom Element Template Engine With Markdown_
+## CEWT
+_Custom Elements With (type-guarded) Templates_
 
-Currently only a fledgling project. Doesn't even have markdown yet. While the eventual goals involve multi-page static site generation and the ability to be used in rust-based web backends for server-side rendering, currently it can be used to help ease the development of single-page applications. Long story short, it makes using [custom elements](https://developer.mozilla.org/en-US/docs/Web/API/Web_Components/Using_custom_elements) and forms a lot easier to use with TypeScript. (docs... maybe)
+Currently only a fledgling project. While the eventual goals involve multi-page static site generation and the ability to be used in rust-based (or maybe NodeJS) web backends for server-side rendering, currently it can be used to help ease the development of single-page applications. Long story short, it makes using [custom elements](https://developer.mozilla.org/en-US/docs/Web/API/Web_Components/Using_custom_elements) and forms a lot easier to use with TypeScript. More information can be found in `cewt`'s own README file.
 
 ## It's all unstable!
-Take a look at acetewm's version. `0.0.1-dev.10` see that? That's 2 preceeding zeros, which _does_ mean I'm very likely to make a breaking change. however, I _might_ not. Hence the pre-release version.
