@@ -316,9 +316,9 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>, inline
 		if template_extends_tag.is_none() {
 			// Write slots
 			writeln!(file_handle, "export class {}Slots {{", template_class_name)?;
-			writeln!(file_handle, "\tprivate _element: HTMLElement;")?;
+			writeln!(file_handle, "\t#element: HTMLElement;")?;
 			writeln!(file_handle, "\tconstructor(element: HTMLElement) {{")?;
-			writeln!(file_handle, "\t\tthis._element = element;")?;
+			writeln!(file_handle, "\t\tthis.#element = element;")?;
 			writeln!(file_handle, "\t}}")?;
 			for child_node_ref in node_ref.descendants() {
 				let HtmlNode::Element(child_elem) = child_node_ref.value() else {
@@ -340,25 +340,25 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>, inline
 				let slot_property_name = slot_raw_name.as_ref().to_case(Case::Camel);
 				writeln!(
 					file_handle,
-					"\tprivate _{}?: {};",
+					"\t#{}?: {};",
 					slot_property_name,
 					HTML_TAG_TO_TYPE.get(slot_element_type).unwrap_or(&"HTMLElement")
 				)?;
 				writeln!(file_handle, "\tget {}() {{", slot_property_name)?;
-				writeln!(file_handle, "\t\tif (this._{} === undefined) {{", slot_property_name)?;
+				writeln!(file_handle, "\t\tif (this.#{} === undefined) {{", slot_property_name)?;
 				writeln!(
 					file_handle,
-					"\t\t\tthis._{} = this._element.querySelector(\"[slot=\\\"{}\\\"]\") ?? \
+					"\t\t\tthis.#{} = this.#element.querySelector(\"[slot=\\\"{}\\\"]\") ?? \
 						document.createElement(\"{}\");",
 					slot_property_name,
 					slot_raw_name,
 					slot_element_type
 					
 				)?;
-				writeln!(file_handle, "\t\t\tthis._{}.slot = \"{}\";", slot_property_name, slot_raw_name)?;
-				writeln!(file_handle, "\t\t\tthis._element.appendChild(this._{});", slot_property_name)?;
+				writeln!(file_handle, "\t\t\tthis.#{}.slot = \"{}\";", slot_property_name, slot_raw_name)?;
+				writeln!(file_handle, "\t\t\tthis.#element.appendChild(this.#{});", slot_property_name)?;
 				writeln!(file_handle, "\t\t}}")?;
-				writeln!(file_handle, "\t\treturn this._{};", slot_property_name)?;
+				writeln!(file_handle, "\t\treturn this.#{};", slot_property_name)?;
 				writeln!(file_handle, "\t}}")?;
 			}
 			writeln!(file_handle, "}}")?;
@@ -366,9 +366,9 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>, inline
 
 		// Write refs
 		writeln!(file_handle, "export class {}Refs {{", template_class_name)?;
-		writeln!(file_handle, "\tprivate _element: HTMLElement;")?;
-		writeln!(file_handle, "\tconstructor(element: HTMLElement) {{")?;
-		writeln!(file_handle, "\t\tthis._element = element;")?;
+		writeln!(file_handle, "\t#element: HTMLElement | ShadowRoot;")?;
+		writeln!(file_handle, "\tconstructor(element: HTMLElement | ShadowRoot) {{")?;
+		writeln!(file_handle, "\t\tthis.#element = element;")?;
 		writeln!(file_handle, "\t}}")?;
 		for child_node_ref in node_ref.descendants() {
 			let HtmlNode::Element(child_elem) = child_node_ref.value() else {
@@ -381,7 +381,7 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>, inline
 			let ref_property_name = ref_raw_name.as_ref().to_case(Case::Camel);
 			writeln!(
 				file_handle,
-				"\tprivate _{}?: {};",
+				"\t#{}?: {};",
 				ref_property_name,
 				if child_elem.name() == "form" {
 					form_collection_code_gen(
@@ -401,18 +401,18 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>, inline
 				}
 			)?;
 			writeln!(file_handle, "\tget {}() {{", ref_property_name)?;
-			writeln!(file_handle, "\t\tif (this._{} === undefined) {{", ref_property_name)?;
+			writeln!(file_handle, "\t\tif (this.#{} === undefined) {{", ref_property_name)?;
 			if template_extends_tag.is_none() {
 				writeln!(
 					file_handle,
-					"\t\t\tthis._{} = this._element.shadowRoot!.querySelector(\":not([is]) [cewt-ref=\\\"{}\\\"]\")!;",
+					"\t\t\tthis.#{} = this.#element.querySelector(\":not([is]) [cewt-ref=\\\"{}\\\"]\")!;",
 					ref_property_name,
 					ref_raw_name,
 				)?;
 			}else{
 				writeln!(
 					file_handle,
-					"\t\t\tthis._{} = this._element.querySelector(\"[cewt-ref=\\\"{}\\\"]:not(:scope [is] *)\")!;",
+					"\t\t\tthis.#{} = this.#element.querySelector(\"[cewt-ref=\\\"{}\\\"]:not(:scope [is] *)\")!;",
 					ref_property_name,
 					ref_raw_name,
 				)?;
@@ -421,12 +421,12 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>, inline
 			if child_elem.name() == "form" {
 				writeln!(
 					file_handle,
-					"\t\t\tthis._{0}.values = normalizeFormValues.bind(this._{0}, this._{0});",
+					"\t\t\tthis.#{0}.values = normalizeFormValues.bind(this.#{0}, this.#{0});",
 					ref_property_name
 				)?;
 			}
 			writeln!(file_handle, "\t\t}}")?;
-			writeln!(file_handle, "\t\treturn this._{};", ref_property_name)?;
+			writeln!(file_handle, "\t\treturn this.#{};", ref_property_name)?;
 			writeln!(file_handle, "\t}}")?;
 		}
 		writeln!(file_handle, "}}")?;
@@ -505,9 +505,9 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>, inline
 						format!("U{:x}", invalid_char.get(0).unwrap().as_str().chars().nth(0).unwrap_or('\0') as u32)
 					}
 				);
-				writeln!(file_handle, "\tprivate _attribute{}Value: string | null = null;", attrib_callback_name)?;
+				writeln!(file_handle, "\t#attribute{}Value: string | null = null;", attrib_callback_name)?;
 				writeln!(file_handle, "\tget {}(): string | null {{", attrib_property)?;
-				writeln!(file_handle, "\t\treturn this._attribute{}Value;", attrib_callback_name)?;
+				writeln!(file_handle, "\t\treturn this.#attribute{}Value;", attrib_callback_name)?;
 				writeln!(file_handle, "\t}}")?;
 				writeln!(file_handle, "\tset {}(v: string | null) {{", attrib_property)?;
 				writeln!(file_handle, "\t\tif (v == null) {{")?;
@@ -525,7 +525,7 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>, inline
 				writeln!(file_handle, "\t}}")?;
 
 				writeln!(cb_ts, "\t\t\tcase \"{}\":", attrib.escape_default())?;
-				writeln!(cb_ts, "\t\t\t\tthis._attribute{}Value = newValue;", attrib_callback_name)?;
+				writeln!(cb_ts, "\t\t\t\tthis.#attribute{}Value = newValue;", attrib_callback_name)?;
 				writeln!(cb_ts, "\t\t\t\tthis.on{}Changed(oldValue, newValue);", attrib_callback_name)?;
 				writeln!(cb_ts, "\t\t\t\tbreak;")?;
 
@@ -540,13 +540,14 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>, inline
 		writeln!(file_handle, "\tconstructor() {{")?;
 		writeln!(file_handle, "\t\tsuper();")?;
 		if template_extends_tag.is_none() {
-			writeln!(file_handle, "\t\tconst shadowRoot = this.attachShadow({{ mode: \"open\" }});")?;
+			writeln!(file_handle, "\t\tconst shadowRoot = this.attachShadow({{ mode: \"closed\" }});")?;
 			writeln!(file_handle, "\t\tshadowRoot.appendChild(")?;
 			writeln!(file_handle, "\t\t\tget{}Template()", template_class_name)?;
 			writeln!(file_handle, "\t\t\t\t.content")?;
 			writeln!(file_handle, "\t\t\t\t.cloneNode(true)")?;
 			writeln!(file_handle, "\t\t);")?;
 			writeln!(file_handle, "\t\tthis.slots = new {}Slots(this);", template_class_name)?;
+			writeln!(file_handle, "\t\tthis.refs = new {}Refs(shadowRoot);", template_class_name)?;
 		}else{
 			writeln!(file_handle, "\t\tif (this.childElementCount == 0) {{")?;
 			writeln!(file_handle, "\t\t\tthis.appendChild(")?;
@@ -556,8 +557,8 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>, inline
 			writeln!(file_handle, "\t\t\t);")?;
 			writeln!(file_handle, "\t\t}}")?;
 			writeln!(file_handle, "\t\tthis.setAttribute(\"is\", \"{}\"); // allow for easy query selecting", template_elem_tag)?;
+			writeln!(file_handle, "\t\tthis.refs = new {}Refs(this);", template_class_name)?;
 		}
-		writeln!(file_handle, "\t\tthis.refs = new {}Refs(this);", template_class_name)?;
 		writeln!(file_handle, "\t}}")?;
 
 		writeln!(file_handle, "\tconnectedCallback() {{")?;
