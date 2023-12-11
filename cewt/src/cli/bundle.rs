@@ -162,7 +162,7 @@ pub(crate) fn do_bundle_spa<P: AsRef<Path>>(
 			};
 			let elem = node_ref.value().as_element_mut().unwrap();
 			let template_elem_tag = elem.attrs.get(&ATTRIBUTE_CEWT_NAME).unwrap().clone();
-			let template_template_id = format!("ace-template-{}", template_elem_tag);
+			let template_template_id = format!("cewt-template-{}", template_elem_tag);
 			elem.attrs.remove(&ATTRIBUTE_CEWT_NAME);
 			elem.attrs.remove(&ATTRIBUTE_CEWT_ATTRIBUTES);
 			elem.attrs.remove(&ATTRIBUTE_CEWT_EXTENDS);
