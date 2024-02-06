@@ -62,6 +62,7 @@ export function normalizeFormValues(source: HTMLFormElement | SubmitEvent): any 
 						result[formControl.name] = formControl.value;
 						break;
 					}
+					break;
 				}
 				default:
 					result[formControl.name] = formControl.value;
