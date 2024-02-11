@@ -4,11 +4,14 @@
 >
 > _ARitz Cracker 2023_
 
-This repository aims to provide a helpful collection of tools to reduce the performance overhead often associated with modern website development. At its center, is `acetewm`.
+This repository aims to provide a helpful collection of tools to reduce the performance overhead often associated with modern website development.
 
 ## CEWT
 _Custom Elements With (type-guarded) Templates_
 
-Currently only a fledgling project. While the eventual goals involve multi-page static site generation and the ability to be used in rust-based (or maybe NodeJS) web backends for server-side rendering, currently it can be used to help ease the development of single-page applications. Long story short, it makes using [custom elements](https://developer.mozilla.org/en-US/docs/Web/API/Web_Components/Using_custom_elements) and forms a lot easier to use with TypeScript. More information can be found in `cewt`'s own README file.
+A tool which generates TypeScript classes from HTML snippets, intended to make [custom elements](https://developer.mozilla.org/en-US/docs/Web/API/Web_Components/Using_custom_elements) easier to use by generating typed boilerplate. (Though if your intellisense can infer the types of returned querystrings given a static HTML string, this may not be that useful to you.)
 
-## It's all unstable!
+## composite
+_Composite materials for HTTP Towers_
+
+A collection of helper functions and structs for use with the hyper/tower ecosystems.

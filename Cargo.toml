@@ -8,7 +8,7 @@ color-eyre = "0.5"
 bpaf = { version = "0.9", features = ["derive"] }
 scraper = "0.16"
 html5ever = "0.26"
-hyper = { version = "1.0.0-rc.4", features = ["full"] }
+hyper = { version = "1", features = ["full"] }
 lazy-regex = "2.5"
 lazy_static = "1"
 tokio = { version = "1", features = ["rt", "sync", "net", "fs"] }
