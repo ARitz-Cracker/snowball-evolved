@@ -1,0 +1,31 @@
+{
+	"version": "1.0.0",
+	"name": "@aritz-cracker/browser-utils",
+	"author": {
+	  "name": "Aritz Beobide-Cardinal",
+	  "email": "aritz@aritzcracker.ca"
+	},
+	"bugs": {
+	  "url": "https://github.com/ARitz-Cracker/snowball-evolved/issues"
+	},
+	"dependencies": {},
+	"description": "A collection of utilities for use in web browsers",
+	"devDependencies": {
+		"@types/node": "^18.16.0",
+		"typescript": "^5.3.3"
+	},
+	"homepage": "https://github.com/ARitz-Cracker/snowball-evolved",
+	"license": "GPL3",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": ["dist"],
+	"repository": {
+	  "type": "git",
+	  "url": "git+https://github.com/ARitz-Cracker/snowball-evolved.git"
+	},
+	"scripts": {
+		"prepare": "npm run build",
+		"build": "rm -rf dist/; tsc"
+	}
+}
