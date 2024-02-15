@@ -1,4 +1,4 @@
-use scraper::{Html, Node as HtmlNode, Selector, ElementRef, node::{Doctype, Comment, Text, Element, ProcessingInstruction}};
+use scraper::{Node as HtmlNode, node::{Doctype, Comment, Text, Element, ProcessingInstruction}};
 pub trait EditableHtmlNode {
 	fn as_doctype_mut(&mut self) -> Option<&mut Doctype>;
 	/// Returns self as a comment.

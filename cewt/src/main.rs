@@ -41,44 +41,6 @@ pub(crate) enum CliAction {
 		/// Folder to scan for HTML template fragments. Must contain a main_template.html.
 		#[bpaf(positional("PATH"))]
 		input_fragments: PathBuf
-	},
-	#[bpaf(command("bundle-multi"))]
-	/// Bundles all template elements for a multi-page application on a static-content server
-	BundleMultiPageApp {
-		/// Elements to include in the bundle. By default, all elements will be included.
-		#[bpaf(argument("ELEMENT"), short, long)]
-		include: Vec<String>,
-		/// Elements to exclude from the bundle. By default, no elements will be excluded. 
-		#[bpaf(argument("ELEMENT"), short, long)]
-		exclude: Vec<String>,
-		/// The webroot directory to write to
-		#[bpaf(argument("PATH"), short, long)]
-		output_dir: PathBuf,
-		/// Folder to scan for HTML template fragments. Must contain a main_template.html.
-		#[bpaf(argument("PATH"), short('f'), long)]
-		input_fragments: PathBuf,
-		/// Folder to scan for pages
-		#[bpaf(argument("PATH"), short('p'), long)]
-		input_pages: PathBuf,
-		/// Bundle for a "fake" MPA, i.e. only output the full document for index.html
-		#[bpaf(short('F'), long)]
-		fake: bool
-	},
-	#[bpaf(command("bundle-server"))]
-	/// Bundles all template elements for the acetewm server.
-	BundleServer {
-		/// Elements to include in the bundle. By default, all elements will be included.
-		#[bpaf(argument("ELEMENT"), short, long)]
-		include: Vec<String>,
-		/// Elements to exclude from the bundle. By default, no elements will be excluded. 
-		#[bpaf(argument("ELEMENT"), short, long)]
-		exclude: Vec<String>,
-		/// The webroot directory to write to
-		#[bpaf(argument("PATH"), short, long)]
-		output_dir: PathBuf,
-		/// Folder to scan for HTML template fragments. Must contain a main_template.html.
-		#[bpaf(argument("PATH"), short('f'), long)]
-		input_fragments: PathBuf
 	}
 }
 
@@ -114,7 +76,6 @@ fn main() -> Result<()> {
 				input_fragments
 			)?;
 		}
-		_ => todo!()
 	}
 	Ok(())
 }

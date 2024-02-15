@@ -1,71 +1,14 @@
-use std::{fs, path::{Path, PathBuf}, io, collections::{HashMap, HashSet}, sync::Arc, ffi::OsString};
+use std::{fs, path::Path, collections::HashSet, sync::Arc, ffi::OsString};
 use cewt::selector;
 use color_eyre::eyre::Result;
 use lazy_static::lazy_static;
 use log::{debug, warn, error};
-use scraper::{Html, Node as HtmlNode, Selector, ElementRef, node::Text};
-use ego_tree::{Tree, NodeId};
+use scraper::{Html, Node as HtmlNode, node::Text};
+use ego_tree::NodeId;
 
 use crate::{consts::{ATTRIBUTE_CEWT_NAME, VALID_CUSTOM_ELEMENT_NAME, INVALID_CUSTOM_ELEMENT_NAME, ATTRIBUTE_ID, ATTRIBUTE_INLINE, ATTRIBUTE_CEWT_ATTRIBUTES, ATTRIBUTE_CEWT_EXTENDS}, workarounds::{html_node_editable::EditableHtmlNode, ego_tree_addons::NodeMutAddons}};
 
 use super::recursive_template_search;
-
-#[derive(Debug)]
-pub(crate) struct TemplateBundle {
-	frontend_templates: String, 
-	backend_templates: HashMap<Arc<str>, Arc<str>>
-}
-impl TemplateBundle {
-	pub fn new() -> Result<Self> {
-		Ok(
-			TemplateBundle {
-				frontend_templates: String::new(),
-				backend_templates: HashMap::new()
-			}
-		)
-	}
-	pub fn add_to_bundle(&mut self, file_path: &Path) -> Result<()> {
-
-		debug!("add_to_bundle: process file: {}", file_path.to_string_lossy());
-		let template_markup = Html::parse_fragment(
-			&String::from_utf8_lossy(&fs::read(&file_path)?)
-		);
-		if template_markup.errors.len() != 0 {
-			warn!("Parse error(s) were detected while reading the following file: {}", file_path.to_string_lossy());
-			warn!("Parse error(s) are as follows:");
-		}
-		for error_msg in template_markup.errors.iter() {
-			warn!("    {}", error_msg);
-		}
-		let template_markup_root_elem = template_markup.root_element();
-		
-		
-		Ok(())
-	}
-}
-
-pub(crate) fn traverse_node_modules<P: AsRef<Path>>(path_dir: P) -> Result<()> {
-	let mut path_dir = fs::canonicalize(path_dir)?;
-	while path_dir.parent().is_some() {
-		path_dir.push("node_modules");
-		let modules_folder_meta = match fs::metadata(&path_dir) {
-			Ok(meta) => meta,
-			Err(e) if e.kind() == io::ErrorKind::NotFound => {
-				path_dir.pop();
-				path_dir.pop();
-				continue;
-			}
-			Err(e) => return Err(e.into()),
-		};
-		if modules_folder_meta.is_dir() {
-			// recursive_bundle_search(path_dir.clone())?;
-		}
-		path_dir.pop();
-		path_dir.pop();
-	}
-	Ok(())
-}
-
 pub(crate) struct IncludeElementChecker {
 	include: HashSet<Arc<str>>,
 	exclude: HashSet<Arc<str>>

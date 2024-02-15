@@ -2,7 +2,6 @@ use std::{fs, path::{Path, PathBuf}, ffi::OsString, collections::HashSet};
 use color_eyre::eyre::Result;
 pub(crate) mod codegen;
 pub(crate) mod bundle;
-pub(crate) mod node_dependencies;
 
 pub(crate) fn recursive_template_search<F: FnMut(&Path, Option<&str>) -> Result<()>>(
 	path_dir: PathBuf,

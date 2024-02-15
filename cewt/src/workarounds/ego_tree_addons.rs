@@ -1,4 +1,4 @@
-use ego_tree::{NodeId, NodeMut, NodeRef, Tree};
+use ego_tree::{NodeMut, NodeRef};
 
 pub trait NodeMutAddons<T> {
 	/// Appends a new child node by cloning the values of source and all its descendants. 

@@ -1,7 +1,7 @@
 use std::collections::{HashSet, HashMap};
 use std::path::Path;
 use std::rc::Rc;
-use crate::consts::{ATTRIBUTE_INLINE, ATTRIBUTE_NAME, ATTRIBUTE_CEWT_REF, HTML_TAG_TO_TYPE, ATTRIBUTE_CEWT_NAME, VALID_CUSTOM_ELEMENT_NAME, INVALID_CUSTOM_ELEMENT_NAME, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, ATTRIBUTE_CEWT_EXTENDS, ATTRIBUTE_CEWT_ATTRIBUTES};
+use crate::consts::{ATTRIBUTE_CEWT_ATTRIBUTES, ATTRIBUTE_CEWT_EXTENDS, ATTRIBUTE_CEWT_NAME, ATTRIBUTE_CEWT_REF, ATTRIBUTE_CLASS, ATTRIBUTE_INLINE, ATTRIBUTE_NAME, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, HTML_TAG_TO_TYPE, INVALID_CUSTOM_ELEMENT_NAME, VALID_CUSTOM_ELEMENT_NAME};
 use cewt::selector;
 use color_eyre::eyre::Result;
 
@@ -559,6 +559,11 @@ pub(crate) fn do_code_gen(file_path: &Path, base_name_hint: Option<&str>, inline
 			writeln!(file_handle, "\t\t}}")?;
 			writeln!(file_handle, "\t\tthis.setAttribute(\"is\", \"{}\"); // allow for easy query selecting", template_elem_tag)?;
 			writeln!(file_handle, "\t\tthis.refs = new {}Refs(this);", template_class_name)?;
+		}
+		if let Some(css_class) = elem.attrs.get(&ATTRIBUTE_CLASS) {
+			writeln!(file_handle, "\t\tif (!this.getAttribute(\"class\")) {{")?;
+			writeln!(file_handle, "\t\t\tthis.setAttribute(\"class\", \"{}\");", css_class.escape_default())?;
+			writeln!(file_handle, "\t\t}}")?;
 		}
 		writeln!(file_handle, "\t}}")?;
 

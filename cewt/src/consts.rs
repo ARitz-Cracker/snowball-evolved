@@ -17,6 +17,7 @@ lazy_static! {
 	pub static ref ATTRIBUTE_CEWT_NAME: QualName = QualName::new(None, "".into(), "cewt-name".into());
 	pub static ref ATTRIBUTE_CEWT_EXTENDS: QualName = QualName::new(None, "".into(), "cewt-extends".into());
 	pub static ref ATTRIBUTE_CEWT_ATTRIBUTES: QualName = QualName::new(None, "".into(), "cewt-attributes".into());
+	pub static ref ATTRIBUTE_CLASS: QualName = QualName::new(None, "".into(), "class".into());
 	pub static ref ATTRIBUTE_ID: QualName = QualName::new(None, "".into(), "id".into());
 	pub static ref HTML_TAG_TO_TYPE: HashMap<&'static str, &'static str> = {
 		// Generated from using /^(\s*)"(.*?)"\s*:\s*(.*?);\s*$/gm on HTMLElementTagNameMap in lib.dom.d.ts
