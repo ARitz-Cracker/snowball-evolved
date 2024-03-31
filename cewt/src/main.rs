@@ -19,9 +19,12 @@ pub(crate) enum CliAction {
 		/// Folder names to exclude, defaults to node_modules.
 		#[bpaf(argument("NAME"), short, long)]
 		exclude: Vec<OsString>,
-		/// Include HTML sniipet in TypeScript output instead of assuming the template exists in the DOM
+		/// Include HTML snippet in TypeScript output instead of assuming the template exists in the DOM
 		#[bpaf(short('I'), long)]
 		inline_html: bool,
+		/// Have generated code contain helpers and "known" properties for HTMLFormElements
+		#[bpaf(short('F'), long)]
+		extended_form_controls: bool,
 		/// Folder to scan for HTML template fragments and generate accompanying code.
 		#[bpaf(positional("PATH"))]
 		path: PathBuf
@@ -49,7 +52,7 @@ fn main() -> Result<()> {
 	env_logger::init();
 	let options = cli_action().run();
 	match options {
-		CliAction::Codegen { exclude, path, inline_html } => {
+		CliAction::Codegen { exclude, path, inline_html, extended_form_controls } => {
 			recursive_template_search(
 				path,
 				&{
@@ -60,7 +63,7 @@ fn main() -> Result<()> {
 					}
 				}.into_iter().collect(),
 				&mut |file_path, base_name_hint| {
-					do_code_gen(file_path, base_name_hint, inline_html)
+					do_code_gen(file_path, base_name_hint, inline_html, extended_form_controls)
 				}
 			)?;
 		},

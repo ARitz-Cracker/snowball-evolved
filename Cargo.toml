@@ -1,5 +1,6 @@
 [workspace]
 members = ["./cewt"]
+resolver = "2"
 
 [workspace.dependencies]
 thiserror = "1.0"
