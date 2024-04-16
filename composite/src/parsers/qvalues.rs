@@ -36,9 +36,9 @@ impl QualityValue {
 			}
 		}
 		if self.value() == check_value {
-			return MatchPrecedent::Exact;
+			MatchPrecedent::Exact
 		}else{
-			return MatchPrecedent::None;
+			MatchPrecedent::None
 		}
 	}
 }
@@ -114,7 +114,7 @@ impl QualitySorter {
 		}) else {
 			return false;
 		};
-		return qvalue.quality > 0;
+		qvalue.quality() > 0
 	}
 	pub fn quality_of(&self, check_value: &str) -> (u16, MatchPrecedent) {
 		let Some((qvalue, match_precedent)) = self.values.iter().find_map(|qvalue| {
@@ -122,7 +122,7 @@ impl QualitySorter {
 			if match_precedent == MatchPrecedent::None {
 				return None;
 			}
-			return Some((qvalue, match_precedent));
+			Some((qvalue, match_precedent))
 		}) else {
 			return (
 				self.wildcard_quality,
@@ -133,7 +133,7 @@ impl QualitySorter {
 				}
 			);
 		};
-		return (qvalue.quality, match_precedent);
+		(qvalue.quality, match_precedent)
 	}
 	pub fn negotiate<'a, I, S>(
 		&'a self,

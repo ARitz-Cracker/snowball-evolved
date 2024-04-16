@@ -1,6 +1,4 @@
-use thiserror::Error;
-
-#[derive(Error, Debug, PartialEq, Eq)]
+#[derive(thiserror::Error, Debug, PartialEq, Eq)]
 pub enum RangeRequestParseError {
 	#[error("Range header couldn't be parsed")]
 	SyntaxError,
@@ -14,7 +12,7 @@ pub enum RangeRequestParseError {
 	ZeroLengthTail
 }
 
-#[derive(Error, Debug, PartialEq, Eq)]
+#[derive(thiserror::Error, Debug, PartialEq, Eq)]
 pub enum RangeResponseError {
 	#[error("Rage specified is outside of the resouce's bounds")]
 	OutOfRange(u64),
