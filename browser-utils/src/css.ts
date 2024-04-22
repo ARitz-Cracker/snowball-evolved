@@ -11,7 +11,7 @@ export function parseCSSTime(time: string | null | undefined = "0s"): number {
 		return 0;
 	}
 	let [_, sign, number, unit] = (() => {
-		const result = time.match(/^\s*([+-]?)([0-9.]+)(s|ms)\s*$/i);
+		const result = time.match(/^\s*([+-]?)([0-9.-]+)(s|ms)\s*$/i);
 		if (result == null) {
 			return ["", "", "NaN", "ms"]
 		}
@@ -242,7 +242,7 @@ export function parseCSSTimingFunction(func: string): ((t: number) => number) | 
 		return COMMON_CSS_TIMING_FUNCS[func as keyof typeof COMMON_CSS_TIMING_FUNCS];
 	}
 	const [_, p1, p2, p3, p4] = (() => {
-		const result = func.match(/^\s*cubic-bezier\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*\)\s*;?\s*$/i);
+		const result = func.match(/^\s*cubic-bezier\(\s*([0-9.-]+)\s*,\s*([0-9.-]+)\s*,\s*([0-9.-]+)\s*,\s*([0-9.-]+)\s*\)\s*;?\s*$/i);
 		if (result == null) {
 			return [NaN, NaN, NaN, NaN, NaN];
 		}
@@ -251,11 +251,11 @@ export function parseCSSTimingFunction(func: string): ((t: number) => number) | 
 	if (!isNaN(p1) && !isNaN(p2) && !isNaN(p3) && !isNaN(p4)) {
 		return newCubicBezierFunction(p1, p2, p3, p4);
 	}
-	let parseResult = func.match(/^\s*steps\(\s*([0-9.]+)\s*,\s*(.+)\s*\)\s*;?\s*$/);
+	let parseResult = func.match(/^\s*steps\(\s*([0-9.-]+)\s*,\s*(.+)\s*\)\s*;?\s*$/);
 	if (parseResult != null) {
 		return newStepsFunction(Number(parseResult[1]), parseResult[2]);
 	}
-	parseResult = func.match(/^\s*linear\(\s*([0-9.,% ]+\s*)+\s*\)\s*;?\s*$/);
+	parseResult = func.match(/^\s*linear\(\s*([0-9.,% -]+\s*)+\s*\)\s*;?\s*$/);
 	if (parseResult == null) {
 		return;
 	}
@@ -263,7 +263,7 @@ export function parseCSSTimingFunction(func: string): ((t: number) => number) | 
 	const argStrs = parseResult[1].split(",");
 	for (let i = 0; i < argStrs.length; i += 1) {
 		const argStr = argStrs[i];
-		const parseArgResult = argStr.match(/^\s*([0-9.]+)\s*(?:\s+([0-9.]+)%\s*)?(?:\s+([0-9.]+)%\s*)?$/);
+		const parseArgResult = argStr.match(/^\s*([0-9.-]+)\s*(?:\s+([0-9.-]+)%\s*)?(?:\s+([0-9.-]+)%\s*)?$/);
 		if (parseArgResult == null) {
 			return;
 		}
