@@ -9,8 +9,8 @@ function updateCSSVariable(elem: HTMLInputElement, curVal: number = elem.valueAs
 		return;
 	}
 	// The default min/max values replicates built-in behaviour
-	const minVal = isNaN(elem.min as any) ? 0 : Number(elem.min);
-	const maxVal = isNaN(elem.max as any) ? 100 : Number(elem.max);
+	const minVal = (elem.min === "" || isNaN(elem.min as any)) ? 0 : Number(elem.min);
+	const maxVal = (elem.max === "" || isNaN(elem.max as any)) ? 100 : Number(elem.max);
 	elem.style.setProperty(
 		'--range-workaround-fill-amount',
 		((curVal - minVal) / (maxVal - minVal)) + ""
@@ -38,8 +38,8 @@ function patchRangeInput(elem: HTMLInputElement){
 		val = Number(val);
 		if(isNaN(val)){
 			// The default min/max values replicates built-in behaviour
-			const minVal = isNaN(elem.min as any) ? 0 : Number(elem.min);
-			const maxVal = isNaN(elem.max as any) ? 100 : Number(elem.max);
+			const minVal = (elem.min === "" || isNaN(elem.min as any)) ? 0 : Number(elem.min);
+			const maxVal = (elem.max === "" || isNaN(elem.max as any)) ? 100 : Number(elem.max);
 			// Setting the value to 50% on an invalid value replicates built-in behaviour
 			val = Math.round((minVal + maxVal) / 2);
 		}
