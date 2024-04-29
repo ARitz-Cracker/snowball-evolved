@@ -1,4 +1,3 @@
-
 // Get the original getters/setters for the input element
 const originalInputDescriptor = Object.getOwnPropertyDescriptor(
 	HTMLInputElement.prototype,
@@ -20,9 +19,19 @@ function updateCSSVariable(elem: HTMLInputElement, curVal: number = elem.valueAs
 // Unique symbol to check if we already patched
 const rangeProgressWorkaroundApplied = Symbol("rangeProgressWorkaroundApplied");
 
-// Patches the element so that changes to .value and .valueAsNumber call updateCSSVariable 
+// Patches the element so that changes to .value and .valueAsNumber calls updateCSSVariable 
 function patchRangeInput(elem: HTMLInputElement){
-	if((elem as any)[rangeProgressWorkaroundApplied] || elem.type != "range"){
+	if((elem as any)[rangeProgressWorkaroundApplied]){
+		if (elem.type != "range") {
+			// This element isn't a range input anymore, remove our setters.
+			delete (elem as any).value;
+			delete (elem as any).valueAsNumber;
+			// This element may turn back into a range input in the future...
+			delete (elem as any)[rangeProgressWorkaroundApplied];
+		}
+		return;
+	}
+	if (elem.type != "range") {
 		return;
 	}
 	function setterValueCallback(val: any) {
@@ -57,15 +66,6 @@ function updateCSSVariableOnTarget(ev: Event) {
 }
 document.addEventListener("input", updateCSSVariableOnTarget, {passive: true});
 document.addEventListener("change", updateCSSVariableOnTarget, {passive: true});
-function updateCSSVariableOnAllRangeInputs() {
-	(
-		document.querySelectorAll("input[type=\"range\"]") as NodeListOf<HTMLInputElement>
-	).forEach(elem => {
-		patchRangeInput(elem);
-	})
-}
-document.addEventListener("DOMContentLoaded", updateCSSVariableOnAllRangeInputs);
-updateCSSVariableOnAllRangeInputs();
 
 const newRangeInputObserver = new MutationObserver((records) => {
 	for (const record of records) {
@@ -74,6 +74,22 @@ const newRangeInputObserver = new MutationObserver((records) => {
 				patchRangeInput(addedNode);
 			}
 		}
+		if (record.target instanceof HTMLInputElement) {
+			patchRangeInput(record.target);
+		}
 	}
 });
-newRangeInputObserver.observe(document.body, {childList: true, subtree: true})
+
+function onDocumentLoaded() {
+	(
+		document.querySelectorAll("input[type=\"range\"]") as NodeListOf<HTMLInputElement>
+	).forEach(elem => {
+		patchRangeInput(elem);
+	})
+	newRangeInputObserver.observe(document.body, {childList: true, subtree: true, attributeFilter: ["type"]});
+}
+if (document.readyState == "loading") {
+	document.addEventListener("DOMContentLoaded", onDocumentLoaded);
+} else {
+	onDocumentLoaded();
+}

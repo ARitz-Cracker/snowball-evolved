@@ -4,10 +4,14 @@ export function needsRangeInputFillWorkaround() {
 	// then set to a value between 0 and 1 depending on where the slider is. 
 	return !CSS.supports("selector(input::-moz-range-progress)");
 }
+
+let importRangeInputFillWorkaroundPromise: Promise<typeof import("./range-input-fill.js")> | undefined;
 export async function applyRangeInputFillWorkaround() {
 	if (needsRangeInputFillWorkaround()) {
-		// The use of Function.prototype helps pevent tree-shaking
-		Function.prototype(await import("./range-input-fill.js"));
+		if (!importRangeInputFillWorkaroundPromise) {
+			importRangeInputFillWorkaroundPromise = import("./range-input-fill.js");
+		}
+		await importRangeInputFillWorkaroundPromise;
 	}	
 }
 
@@ -22,10 +26,16 @@ export function needsCustomElementsWorkaround() {
 		return true;
 	}
 }
+
+let importCustomElementsWorkaroundPromise: Promise<any> | undefined;
 export async function applyCustomElementsWorkaround() {
 	if (needsCustomElementsWorkaround()) {
 		// The use of Function.prototype helps pevent tree-shaking
 		Function.prototype(await import("@ungap/custom-elements" as any));
+		if (!importCustomElementsWorkaroundPromise) {
+			importCustomElementsWorkaroundPromise = import("@ungap/custom-elements" as any);
+		}
+		await importCustomElementsWorkaroundPromise;
 	}
 }
 
