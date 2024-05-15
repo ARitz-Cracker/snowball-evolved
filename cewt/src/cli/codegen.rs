@@ -365,7 +365,7 @@ pub(crate) fn do_code_gen(
 			if child_elem.name() == "form" {
 				writeln!(
 					gen_code,
-					"\t\t\tthis.#{0}.values = normalizeFormValues.bind(this.#{0}, this.#{0});",
+					"\t\t\tthis.#{0}.values = normalizeFormValues.bind(this.#{0}, this.#{0}) as any;",
 					ref_property_name
 				)?;
 			}
