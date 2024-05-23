@@ -22,6 +22,6 @@ export const off = /*#__PURE__*/ document.removeEventListener.bind(/*#__PURE__*/
  * Just call's preventDefault on the event.
  * Useful for `thing.addEventListener("something", preventDefault);`
  */
-function preventDefault(ev: Event) {
+export function preventDefault(ev: Event) {
 	ev.preventDefault();
 }
