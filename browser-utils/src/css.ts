@@ -230,8 +230,9 @@ const COMMON_CSS_TIMING_FUNCS = {
 
 /**
  * Parses a [CSS easing function](https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function) and returns a
- * function whichs takes a value between 0 and 1, and returns a value between 0 and 1. If the input to the returned
- * function exceeds those bounds, it will be clamped.
+ * function whichs takes a value between 0 and 1, and returns a value between 0 and 1. (Unless you have a funky
+ * piecewise-linear function) If the input to the return function is less than 0 or greater than 1, the input will be
+ * clamped.
  * 
  * If the inputted string is not a valid easing function, (as defined during April 2024) then `undefined` is returned.
  * @param func [CSS easing function](https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function)

@@ -7,8 +7,6 @@
  */
 export function isElementInViewport(elem: Element, completely: boolean = false): boolean {
 	const rect = elem.getBoundingClientRect();
-
-	// This is honestly the strangest code I've ever written
 	return completely ? (
 		rect.top >= 0 &&
 		rect.left >= 0 &&

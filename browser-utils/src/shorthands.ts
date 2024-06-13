@@ -1,25 +1,49 @@
 /**
  * Shorthand for `document.querySelector`
  */
-export const q = /*#__PURE__*/ document.querySelector.bind(/*#__PURE__*/ document);
+export const q = document.querySelector.bind(document);
 
 /**
  * Shorthand for `document.querySelectorAll`
  */
-export const qa = /*#__PURE__*/ document.querySelectorAll.bind(/*#__PURE__*/ document);
+export const qa = document.querySelectorAll.bind(document);
+
+/**
+ * Shorthand for `document.addEventListener`
+ * 
+ * If you want `window`, use `wOn`
+ */
+export const on = document.addEventListener.bind(document);
+
+/**
+ * Shorthand for `document.removeEventListener`
+ * 
+ * If you want `window`, use `wOff`
+ */
+export const off = document.removeEventListener.bind(document);
 
 /**
  * Shorthand for `document.addEventListener`
  */
-export const on = /*#__PURE__*/ document.addEventListener.bind(/*#__PURE__*/ document);
+export const dOn = document.addEventListener.bind(document);
 
 /**
  * Shorthand for `document.removeEventListener`
  */
-export const off = /*#__PURE__*/ document.removeEventListener.bind(/*#__PURE__*/ document);
+export const dOff = document.removeEventListener.bind(document);
 
 /**
- * Just call's preventDefault on the event.
+ * Shorthand for `window.addEventListener`
+ */
+export const wOn = window.addEventListener.bind(window);
+
+/**
+ * Shorthand for `window.removeEventListener`
+ */
+export const wOff = window.removeEventListener.bind(window);
+
+/**
+ * Just calls preventDefault on the event.
  * Useful for `thing.addEventListener("something", preventDefault);`
  */
 export function preventDefault(ev: Event) {
