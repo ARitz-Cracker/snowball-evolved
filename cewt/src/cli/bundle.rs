@@ -81,7 +81,7 @@ pub(crate) fn do_bundle_spa<P: AsRef<Path>>(
 				if elem.name() != "template" {
 					return None;
 				}
-				let Some(template_elem_tag) = elem.attrs.get(&ATTRIBUTE_CEWT_NAME) else {
+				let Some(template_elem_tag) = elem.attrs.get(&*ATTRIBUTE_CEWT_NAME) else {
 					warn!("Skipping template without \"cewt-name\" attribute");
 					return None;
 				};
@@ -104,13 +104,13 @@ pub(crate) fn do_bundle_spa<P: AsRef<Path>>(
 				continue;
 			};
 			let elem = node_ref.value().as_element_mut().unwrap();
-			let template_elem_tag = elem.attrs.get(&ATTRIBUTE_CEWT_NAME).unwrap().clone();
+			let template_elem_tag = elem.attrs.get(&*ATTRIBUTE_CEWT_NAME).unwrap().clone();
 			let template_template_id = format!("cewt-template-{}", template_elem_tag);
-			elem.attrs.remove(&ATTRIBUTE_CEWT_NAME);
-			elem.attrs.remove(&ATTRIBUTE_CEWT_ATTRIBUTES);
-			elem.attrs.remove(&ATTRIBUTE_CEWT_EXTENDS);
+			elem.attrs.shift_remove(&*ATTRIBUTE_CEWT_NAME);
+			elem.attrs.shift_remove(&*ATTRIBUTE_CEWT_ATTRIBUTES);
+			elem.attrs.shift_remove(&*ATTRIBUTE_CEWT_EXTENDS);
 			elem.attrs.insert(ATTRIBUTE_ID.clone(), template_template_id.clone().into());
-			let is_inline = elem.attrs.contains_key(&ATTRIBUTE_INLINE);
+			let is_inline = elem.attrs.contains_key(&*ATTRIBUTE_INLINE);
 			let node_ref = template_markup.tree.get(*node_id).unwrap(); // invalidates elem
 			
 			if is_inline {

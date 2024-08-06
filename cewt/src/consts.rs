@@ -9,6 +9,7 @@ pub static VALID_CUSTOM_ELEMENT_NAME: Lazy<Regex> = lazy_regex!(r"^[a-z][\-.0-9_
 /// A slightly more pessimistic version of what's specified in the HTML spec.
 pub static INVALID_CUSTOM_ELEMENT_NAME: Lazy<Regex> = lazy_regex!(r"^(?:annotation-xml|color-.*|font-face|font-face-.*|missing-glyph)$");
 lazy_static! {
+	pub static ref ATTRIBUTE_IS: QualName = QualName::new(None, "".into(), "is".into());
 	pub static ref ATTRIBUTE_INLINE: QualName = QualName::new(None, "".into(), "inline".into());
 	pub static ref ATTRIBUTE_NAME: QualName = QualName::new(None, "".into(), "name".into());
 	pub static ref ATTRIBUTE_VALUE: QualName = QualName::new(None, "".into(), "value".into());

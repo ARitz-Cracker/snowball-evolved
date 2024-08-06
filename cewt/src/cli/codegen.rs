@@ -1,7 +1,8 @@
-use std::collections::{HashSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::path::Path;
 use std::rc::Rc;
-use crate::consts::{ATTRIBUTE_INLINE, ATTRIBUTE_NAME, ATTRIBUTE_CEWT_REF, HTML_TAG_TO_TYPE, ATTRIBUTE_CEWT_NAME, VALID_CUSTOM_ELEMENT_NAME, INVALID_CUSTOM_ELEMENT_NAME, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, ATTRIBUTE_CEWT_EXTENDS, ATTRIBUTE_CEWT_ATTRIBUTES};
+use crate::consts::{ATTRIBUTE_CEWT_ATTRIBUTES, ATTRIBUTE_CEWT_EXTENDS, ATTRIBUTE_CEWT_NAME, ATTRIBUTE_CEWT_REF, ATTRIBUTE_INLINE, ATTRIBUTE_IS, ATTRIBUTE_NAME, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE, HTML_TAG_TO_TYPE, INVALID_CUSTOM_ELEMENT_NAME, VALID_CUSTOM_ELEMENT_NAME};
+use crate::CliCustomElement;
 use cewt::selector;
 use color_eyre::eyre::Result;
 
@@ -37,13 +38,13 @@ pub(crate) fn form_collection_code_gen<W: Write>(class_name: &str, form_elem: El
 	)) {
 		// Unwraps are used here cuz the selector should make sure that they're always valid.
 		let form_control_elem = form_control_ref.value();
-		let form_control_name = form_control_elem.attrs.get(&ATTRIBUTE_NAME).unwrap() as &str;
+		let form_control_name = form_control_elem.attrs.get(&*ATTRIBUTE_NAME).unwrap() as &str;
 		if seen_names.contains(form_control_name) {
 			continue;
 		}
 		let form_control_class = if
 			form_control_elem.name() == "input" &&
-			form_control_elem.attrs.get(&ATTRIBUTE_TYPE).is_some_and(|val| {val as &str == "radio"})
+			form_control_elem.attrs.get(&*ATTRIBUTE_TYPE).is_some_and(|val| {val as &str == "radio"})
 		{
 			"RadioNodeList"
 		} else {
@@ -60,8 +61,8 @@ pub(crate) fn form_collection_code_gen<W: Write>(class_name: &str, form_elem: El
 	writeln!(output, "}};")?;
 
 	seen_names.clear();
-	let mut radio_buttons: HashMap<Rc<str>, HashSet<Rc<str>>> = HashMap::new();
-	let mut submit_buttons: HashMap<Rc<str>, HashSet<Rc<str>>> = HashMap::new();
+	let mut radio_buttons: BTreeMap<Rc<str>, HashSet<Rc<str>>> = BTreeMap::new();
+	let mut submit_buttons: BTreeMap<Rc<str>, HashSet<Rc<str>>> = BTreeMap::new();
 	writeln!(output, "export type {}FormValues{} = {{", class_name, nonce)?;
 	for form_control_ref in form_elem.select(selector!(
 		"button[name],\
@@ -72,7 +73,7 @@ pub(crate) fn form_collection_code_gen<W: Write>(class_name: &str, form_elem: El
 	)) {
 		// Unwraps are used here cuz the selector should make sure that they're always valid.
 		let form_control_elem = form_control_ref.value();
-		let form_control_name = form_control_elem.attrs.get(&ATTRIBUTE_NAME).unwrap() as &str;
+		let form_control_name = form_control_elem.attrs.get(&*ATTRIBUTE_NAME).unwrap() as &str;
 		// JS handles unicode differently. Too bad!
 		let escaped_control_name = form_control_name.escape_default().to_string();
 		match form_control_elem.name() {
@@ -80,13 +81,13 @@ pub(crate) fn form_collection_code_gen<W: Write>(class_name: &str, form_elem: El
 				if !submit_buttons.contains_key(escaped_control_name.as_str()) {
 					submit_buttons.insert(escaped_control_name.as_str().into(), HashSet::new());
 				}
-				if let Some(form_control_value) = form_control_elem.attrs.get(&ATTRIBUTE_VALUE) {
+				if let Some(form_control_value) = form_control_elem.attrs.get(&*ATTRIBUTE_VALUE) {
 					submit_buttons.get_mut(escaped_control_name.as_str()).unwrap()
 						.insert((form_control_value as &str).into());
 				}
 			},
 			"input" => {
-				match form_control_elem.attrs.get(&ATTRIBUTE_TYPE).map_or("", |val| {val as &str}) {
+				match form_control_elem.attrs.get(&*ATTRIBUTE_TYPE).map_or("", |val| {val as &str}) {
 					"checkbox" => {
 						// Should we support indeterminate or array of const strings?
 						writeln!(output, "\t\"{}\": boolean;", escaped_control_name)?;
@@ -104,7 +105,7 @@ pub(crate) fn form_collection_code_gen<W: Write>(class_name: &str, form_elem: El
 						if !radio_buttons.contains_key(escaped_control_name.as_str()) {
 							radio_buttons.insert(escaped_control_name.as_str().into(), HashSet::new());
 						}
-						if let Some(form_control_value) = form_control_elem.attrs.get(&ATTRIBUTE_VALUE) {
+						if let Some(form_control_value) = form_control_elem.attrs.get(&*ATTRIBUTE_VALUE) {
 							radio_buttons.get_mut(escaped_control_name.as_str()).unwrap()
 								.insert((form_control_value as &str).into());
 						}
@@ -124,7 +125,7 @@ pub(crate) fn form_collection_code_gen<W: Write>(class_name: &str, form_elem: El
 				if form_control_ref.has_children() {
 					write!(output, "\t\"{}\": \"\"", escaped_control_name)?;
 					for select_option_ref in form_control_ref.select(selector!("option")) {
-						if let Some(form_control_value) = select_option_ref.value().attrs.get(&ATTRIBUTE_VALUE) {
+						if let Some(form_control_value) = select_option_ref.value().attrs.get(&*ATTRIBUTE_VALUE) {
 							write!(output, " | \"{}\"", form_control_value)?;
 						}
 						writeln!(output, ";")?;
@@ -165,7 +166,8 @@ pub(crate) fn do_code_gen(
 	file_path: &Path,
 	base_name_hint: Option<&str>,
 	inline_template: bool,
-	extended_form_controls: bool
+	extended_form_controls: bool,
+	external_custom_elements: &[CliCustomElement]
 ) -> Result<()> {
 	debug!("do_code_gen: process file: {}", file_path.to_string_lossy());
 	let template_markup = Html::parse_fragment(
@@ -184,8 +186,8 @@ pub(crate) fn do_code_gen(
 		match node.value() {
 			HtmlNode::Element(elem) => {
 				elem.name() == "template" &&
-				elem.attrs.contains_key(&ATTRIBUTE_CEWT_NAME) &&
-				!elem.attrs.contains_key(&ATTRIBUTE_INLINE)
+				elem.attrs.contains_key(&*ATTRIBUTE_CEWT_NAME) &&
+				!elem.attrs.contains_key(&*ATTRIBUTE_INLINE)
 			}
 			_ => false
 		}
@@ -209,17 +211,31 @@ pub(crate) fn do_code_gen(
 	let mut form_collection_nonce = 0u64;
 	let mut form_collections_buf = Vec::new();
 	let mut gen_code = Vec::new();
+	// let mut package_to_classes: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
+	let mut classes_to_package: BTreeMap<&str, &str> = BTreeMap::new();
+	let mut extended_html_tag_to_type: HashMap<(&str, &str), &str> = HashMap::new();
+	let mut imports_needed: BTreeSet<String> = BTreeSet::new();
+	for elem_def in external_custom_elements.iter() {
+		if let Some(package) = elem_def.package.as_deref() {
+			classes_to_package.insert(elem_def.class_name.as_str(), package);
+		}
+		extended_html_tag_to_type.insert(
+			(elem_def.tag.as_str(), elem_def.extends.as_deref().unwrap_or("")),
+			elem_def.class_name.as_str()
+		);
+	}
+
 	for node_ref in template_markup_root_elem.children() {
 		let HtmlNode::Element(elem) = node_ref.value() else {
 			continue;
 		};
 		if
 			elem.name() != "template" ||
-			elem.attrs.contains_key(&ATTRIBUTE_INLINE)
+			elem.attrs.contains_key(&*ATTRIBUTE_INLINE)
 		{
 			continue;
 		}
-		let Some(template_elem_tag) = elem.attrs.get(&ATTRIBUTE_CEWT_NAME) else {
+		let Some(template_elem_tag) = elem.attrs.get(&*ATTRIBUTE_CEWT_NAME) else {
 			warn!("Skipping template without \"cewt-name\" attribute");
 			continue;
 		};
@@ -240,13 +256,13 @@ pub(crate) fn do_code_gen(
 			}
 		);
 
-		let template_extends_tag = elem.attrs.get(&ATTRIBUTE_CEWT_EXTENDS);
+		let template_extends_tag = elem.attrs.get(&*ATTRIBUTE_CEWT_EXTENDS);
 		let template_extends_class = template_extends_tag.and_then(|v| {
 			HTML_TAG_TO_TYPE.get(v as &str)
 		}).unwrap_or(&"HTMLElement");
 
 		// TODO: Enforce the rules mentioned here https://stackoverflow.com/a/25033330
-		let template_observed_attributes = elem.attrs.get(&ATTRIBUTE_CEWT_ATTRIBUTES)
+		let template_observed_attributes = elem.attrs.get(&*ATTRIBUTE_CEWT_ATTRIBUTES)
 			.map(|attribute_str| {
 				let mut attributes = HashSet::new();
 				for attribute in (attribute_str as &str).split(',') {
@@ -271,34 +287,51 @@ pub(crate) fn do_code_gen(
 				if child_elem.name() != "slot" {
 					continue;
 				}
-				let Some(slot_raw_name) = child_elem.attrs.get(&ATTRIBUTE_NAME) else {
+				let Some(slot_raw_name) = child_elem.attrs.get(&*ATTRIBUTE_NAME) else {
 					warn!("template \"{}\" has a nameless slot!", template_elem_tag);
 					continue;
 				};
 				debug!("... with slot: {}", slot_raw_name);
-				let slot_element_type = child_node_ref
+				let (slot_element_tag, slot_element_tag_extends) = child_node_ref
 					.children()
 					.find_map(|v| v.value().as_element())
-					.map(|elem|{elem.name()})
-					.unwrap_or("span");
+					.map(|elem|{
+						(elem.name(), elem.attrs.get(&*ATTRIBUTE_IS).map(std::ops::Deref::deref).unwrap_or(""))
+					})
+					.unwrap_or(("span", ""));
 				let slot_property_name = slot_raw_name.as_ref().to_case(Case::Camel);
+				let slot_property_type = *extended_html_tag_to_type.get(
+					&(slot_element_tag, slot_element_tag_extends)
+				).unwrap_or(
+					HTML_TAG_TO_TYPE.get(slot_element_tag).unwrap_or(&"HTMLElement")
+				);
 				writeln!(
 					gen_code,
 					"\t#{}?: {};",
 					slot_property_name,
-					HTML_TAG_TO_TYPE.get(slot_element_type).unwrap_or(&"HTMLElement")
+					slot_property_type
 				)?;
+				imports_needed.insert(slot_property_type.into());
 				writeln!(gen_code, "\tget {}() {{", slot_property_name)?;
 				writeln!(gen_code, "\t\tif (this.#{} === undefined) {{", slot_property_name)?;
-				writeln!(
-					gen_code,
-					"\t\t\tthis.#{} = this.#element.querySelector(\"[slot=\\\"{}\\\"]\") ?? \
-						document.createElement(\"{}\");",
-					slot_property_name,
-					slot_raw_name,
-					slot_element_type
-					
-				)?;
+				if slot_element_tag_extends.len() == 0 {
+					writeln!(
+						gen_code,
+						"\t\t\tthis.#{} = this.#element.querySelector(\"[slot=\\\"{}\\\"]\") ?? \
+							document.createElement(\"{}\");",
+						slot_property_name,
+						slot_raw_name,
+						slot_element_tag
+						
+					)?;
+				} else {
+					writeln!(
+						gen_code,
+						"\t\t\tthis.#{slot_property_name} = this.#element.querySelector(\"[slot=\\\"{slot_raw_name}\\\"]\") ?? \
+							document.createElement(\"{slot_element_tag}\", {{is: \"{slot_element_tag_extends}\"}});",
+					)?;
+				}
+				
 				writeln!(gen_code, "\t\t\tthis.#{}.slot = \"{}\";", slot_property_name, slot_raw_name)?;
 				writeln!(gen_code, "\t\t\tthis.#element.appendChild(this.#{});", slot_property_name)?;
 				writeln!(gen_code, "\t\t}}")?;
@@ -318,7 +351,7 @@ pub(crate) fn do_code_gen(
 			let HtmlNode::Element(child_elem) = child_node_ref.value() else {
 				continue;
 			};
-			let Some(ref_raw_name) = child_elem.attrs.get(&ATTRIBUTE_CEWT_REF) else {
+			let Some(ref_raw_name) = child_elem.attrs.get(&*ATTRIBUTE_CEWT_REF) else {
 				continue;
 			};
 			debug!("... with ref: {}", ref_raw_name);
@@ -340,8 +373,16 @@ pub(crate) fn do_code_gen(
 						form_collection_nonce
 					)
 				}else{
+					let child_elem_tag = child_elem.name();
+					let child_elem_tag_extends = child_elem.attrs.get(&*ATTRIBUTE_IS).map(std::ops::Deref::deref).unwrap_or("");
 					// I know, useless clone, haven't had much sleep.
-					HTML_TAG_TO_TYPE.get(child_elem.name()).unwrap_or(&"HTMLElement").to_string()
+					let child_elem_type = extended_html_tag_to_type.get(
+						&(child_elem_tag, child_elem_tag_extends)
+					).unwrap_or(
+						HTML_TAG_TO_TYPE.get(child_elem_tag).unwrap_or(&"HTMLElement")
+					).to_string();
+					imports_needed.insert(child_elem_type.clone());
+					child_elem_type
 				}
 			)?;
 			writeln!(gen_code, "\tget {}() {{", ref_property_name)?;
@@ -531,7 +572,33 @@ pub(crate) fn do_code_gen(
 	writeln!(file_handle, "// auto-generated by C.E.W.T.")?;
 	writeln!(file_handle, "// DO NOT EDIT BY HAND!!")?;
 	if form_collection_nonce > 0 {
-		writeln!(file_handle, "import {{ normalizeFormValues }} from \"@aritz-cracker/browser-utils\";")?;
+		imports_needed.insert("normalizeFormValues".into());
+		classes_to_package.insert("normalizeFormValues", "@aritz-cracker/browser-utils");
+		//writeln!(file_handle, "import {{ normalizeFormValues }} from \"@aritz-cracker/browser-utils\";")?;
+	}
+	let mut package_to_types: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
+	for external_type in imports_needed.iter().map(std::ops::Deref::deref) {
+		let Some(package) = classes_to_package.get(external_type) else {
+			continue;
+		};
+		if let Some(types_in_package) = package_to_types.get_mut(package) {
+			types_in_package.push(external_type);
+		} else {
+			package_to_types.insert(package, vec![external_type]);
+		}
+	}
+	for (package, stuff) in package_to_types.into_iter() {
+		//writeln!(file_handle, "import {{ normalizeFormValues }} from \"@aritz-cracker/browser-utils\";")?;
+		file_handle.write("import { ".as_bytes())?;
+		let mut stuff_iter = stuff.into_iter();
+		if let Some(external_type) = stuff_iter.next() {
+			file_handle.write(external_type.as_bytes())?;
+		}
+		for external_type in stuff_iter {
+			file_handle.write(", ".as_bytes())?;
+			file_handle.write(external_type.as_bytes())?;
+		}
+		writeln!(file_handle, " }} from \"{}\";", package.escape_default())?;
 	}
 	file_handle.write_all(&gen_code)?;
 	if form_collection_nonce > 0 {
