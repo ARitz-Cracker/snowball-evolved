@@ -7,7 +7,7 @@ thiserror = "1.0"
 color-eyre = "0.6.3"
 bpaf = { version = "0.9", features = ["derive"] }
 scraper = { version = "0.20", features = ["deterministic"]}
-html5ever = "0.27"
+html5ever = "0.27" # Note: Do not update unless scraper updates
 hyper = { version = "1.0.0-rc.4", features = ["full"] }
 lazy-regex = "3.2"
 lazy_static = "1"

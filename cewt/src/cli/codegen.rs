@@ -61,8 +61,8 @@ pub(crate) fn form_collection_code_gen<W: Write>(class_name: &str, form_elem: El
 	writeln!(output, "}};")?;
 
 	seen_names.clear();
-	let mut radio_buttons: BTreeMap<Rc<str>, HashSet<Rc<str>>> = BTreeMap::new();
-	let mut submit_buttons: BTreeMap<Rc<str>, HashSet<Rc<str>>> = BTreeMap::new();
+	let mut radio_buttons: BTreeMap<Rc<str>, BTreeSet<Rc<str>>> = BTreeMap::new();
+	let mut submit_buttons: BTreeMap<Rc<str>, BTreeSet<Rc<str>>> = BTreeMap::new();
 	writeln!(output, "export type {}FormValues{} = {{", class_name, nonce)?;
 	for form_control_ref in form_elem.select(selector!(
 		"button[name],\
@@ -79,7 +79,7 @@ pub(crate) fn form_collection_code_gen<W: Write>(class_name: &str, form_elem: El
 		match form_control_elem.name() {
 			"button" => {
 				if !submit_buttons.contains_key(escaped_control_name.as_str()) {
-					submit_buttons.insert(escaped_control_name.as_str().into(), HashSet::new());
+					submit_buttons.insert(escaped_control_name.as_str().into(), BTreeSet::new());
 				}
 				if let Some(form_control_value) = form_control_elem.attrs.get(&*ATTRIBUTE_VALUE) {
 					submit_buttons.get_mut(escaped_control_name.as_str()).unwrap()
@@ -103,7 +103,7 @@ pub(crate) fn form_collection_code_gen<W: Write>(class_name: &str, form_elem: El
 					}
 					"radio" => {
 						if !radio_buttons.contains_key(escaped_control_name.as_str()) {
-							radio_buttons.insert(escaped_control_name.as_str().into(), HashSet::new());
+							radio_buttons.insert(escaped_control_name.as_str().into(), BTreeSet::new());
 						}
 						if let Some(form_control_value) = form_control_elem.attrs.get(&*ATTRIBUTE_VALUE) {
 							radio_buttons.get_mut(escaped_control_name.as_str()).unwrap()
@@ -264,7 +264,7 @@ pub(crate) fn do_code_gen(
 		// TODO: Enforce the rules mentioned here https://stackoverflow.com/a/25033330
 		let template_observed_attributes = elem.attrs.get(&*ATTRIBUTE_CEWT_ATTRIBUTES)
 			.map(|attribute_str| {
-				let mut attributes = HashSet::new();
+				let mut attributes = BTreeSet::new();
 				for attribute in (attribute_str as &str).split(',') {
 					attributes.insert(attribute.trim());
 				}
